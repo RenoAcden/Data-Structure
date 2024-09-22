@@ -1,55 +1,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Define the structure for a node in the doubly circular linked list
-struct Node {
+struct node {
     int data;
-    struct Node *prev;
-    struct Node *next;
+    struct node *pre, *next;
 };
 
-// Declare the head pointer globally
-struct Node *head = NULL;
+struct node *head = NULL;
 
 // Function prototypes
-void createNode();
-void insertAtFront();
-void insertAtEnd();
-void insertAtPosition();
+void createList();
+void insertFront();
+void insertEnd();
+void insertMiddle();
 void deleteFront();
 void deleteEnd();
-void deleteAtPosition();
-void displayList();
+void deleteMiddle();
+void display();
+
 
 int main() {
     int choice;
-
     while (1) {
-        printf("\nDoubly Circular Linked List Menu\n");
-        printf("1. Create list\n");
-        printf("2. Insert at front\n");
-        printf("3. Insert at end\n");
-        printf("4. Insert at a specific position\n");
-        printf("5. Delete the front node\n");
-        printf("6. Delete the end node\n");
-        printf("7. Delete a node at a specific position\n");
-        printf("8. Display list\n");
+        printf("\nMenu:\n");
+        printf("1. Create List\n");
+        printf("2. Insert at Front\n");
+        printf("3. Insert at End\n");
+        printf("4. Insert at Middle\n");
+        printf("5. Delete from Front\n");
+        printf("6. Delete from End\n");
+        printf("7. Delete from Middle\n");
+        printf("8. Display List\n");
         printf("9. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                createNode();
+                createList();
                 break;
             case 2:
-                insertAtFront();
+                insertFront();
                 break;
             case 3:
-                insertAtEnd();
+                insertEnd();
                 break;
             case 4:
-                insertAtPosition();
+                insertMiddle();
                 break;
             case 5:
                 deleteFront();
@@ -58,258 +55,212 @@ int main() {
                 deleteEnd();
                 break;
             case 7:
-                deleteAtPosition();
+                deleteMiddle();
                 break;
             case 8:
-                displayList();
+                display();
                 break;
             case 9:
-                exit(0);
+                exit(0); // Exit the program
             default:
-                printf("Invalid choice. Please enter again.\n");
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+    return 0;
+}
+// Create a list with multiple nodes
+void createList() {
+    int n, element, i;
+    struct node *newNode, *temp;
+
+    // Clear the list before creating a new one
+    while (head != NULL) {
+        deleteFront();
+    }
+    
+    printf("Enter the number of nodes to create: ");
+    scanf("%d", &n);
+
+    if (n <= 0) {
+        printf("Invalid number of nodes\n");
+        return;
+    }
+
+    for (i = 0; i < n; i++) {
+        newNode = (struct node *)malloc(sizeof(struct node));
+        if (newNode == NULL) {
+            printf("Memory allocation failed\n");
+            return;
+        }
+        printf("Enter element %d: ", i + 1);
+        scanf("%d", &element);
+        newNode->data = element;
+        newNode->next = NULL;
+        newNode->pre = NULL;
+
+        if (head == NULL) {
+            head = newNode;
+        } else {
+            temp = head;
+            while (temp->next != NULL)
+                temp = temp->next;
+            temp->next = newNode;
+            newNode->pre = temp;
         }
     }
 }
-
-// Function to create a new node (initialize list with one node)
-void createNode() {
-    int data;
-    // Allocate memory for the new node
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+// Insertion at the front
+void insertFront() {
+    int element;
+    struct node *newNode = (struct node *)malloc(sizeof(struct node));
     if (newNode == NULL) {
         printf("Memory allocation failed\n");
         return;
     }
-
-    // Set the node's data and initialize pointers
-    printf("Enter the data for the node: ");
-    scanf("%d", &data);
-    newNode->data = data;
-    newNode->next = newNode;
-    newNode->prev = newNode;
-
-    // Set head to point to the new node
+    printf("Enter the element to be inserted: ");
+    scanf("%d", &element);
+    newNode->data = element;
+    newNode->pre = NULL;
+    newNode->next = head;
+    if (head != NULL)
+        head->pre = newNode;
     head = newNode;
 }
 
-// Function to insert a node at the front (1st position) of the doubly circular linked list
-void insertAtFront() {
-    if (head == NULL) {
-        printf("List is empty. Create the list first.\n");
-        return;
-    }
-
-    int data;
-    printf("Enter data to insert at front: ");
-    scanf("%d", &data);
-
-    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
+// Insertion at the end
+void insertEnd() {
+    int element;
+    struct node *newNode = (struct node *)malloc(sizeof(struct node));
     if (newNode == NULL) {
         printf("Memory allocation failed\n");
         return;
     }
-    newNode->data = data;
+    printf("Enter the element to be inserted: ");
+    scanf("%d", &element);
+    newNode->data = element;
+    newNode->next = NULL;
 
-    if (head->next == head) { // Only one node in the list
-        newNode->next = head;
-        newNode->prev = head;
-        head->next = newNode;
-        head->prev = newNode;
-    } else {
-        newNode->next = head;
-        newNode->prev = head->prev;
-        head->prev->next = newNode;
-        head->prev = newNode;
-    }
-
-    head = newNode;
-}
-
-// Function to insert a node at the end of the doubly circular linked list
-void insertAtEnd() {
     if (head == NULL) {
-        printf("List is empty. Create the list first.\n");
+        newNode->pre = NULL;
+        head = newNode;
         return;
     }
 
-    int data;
-    printf("Enter data to insert at end: ");
-    scanf("%d", &data);
+    struct node *temp = head;
+    while (temp->next != NULL)
+        temp = temp->next;
+    temp->next = newNode;
+    newNode->pre = temp;
+}
 
-    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
+// Insertion at a specified position
+void insertMiddle() {
+    int element, position, i = 1;
+    struct node *newNode = (struct node *)malloc(sizeof(struct node));
     if (newNode == NULL) {
         printf("Memory allocation failed\n");
         return;
     }
-    newNode->data = data;
-
-    if (head->next == head) { // Only one node in the list
-        newNode->next = head;
-        newNode->prev = head;
-        head->next = newNode;
-        head->prev = newNode;
-    } else {
-        struct Node *last = head->prev;
-        newNode->next = head;
-        newNode->prev = last;
-        last->next = newNode;
-        head->prev = newNode;
-    }
-}
-
-// Function to insert a node at a specific position in the doubly circular linked list
-void insertAtPosition() {
-    if (head == NULL) {
-        printf("List is empty. Create the list first.\n");
-        return;
-    }
-
-    int data, position;
-    printf("Enter data to insert: ");
-    scanf("%d", &data);
+    printf("Enter the element to be inserted: ");
+    scanf("%d", &element);
     printf("Enter the position to insert: ");
     scanf("%d", &position);
 
-    if (position < 1) {
-        printf("Position should be 1 or greater.\n");
-        return;
-    }
-
-    struct Node *newNode = (struct Node *)malloc(sizeof(struct Node));
-    if (newNode == NULL) {
-        printf("Memory allocation failed\n");
-        return;
-    }
-    newNode->data = data;
-
     if (position == 1) {
-        insertAtFront();
+        insertFront();
         return;
     }
 
-    struct Node *temp = head;
-    int count = 1;
-
-    while (count < position - 1) {
+    struct node *temp = head;
+    for (i = 1; i < position - 1 && temp != NULL; i++)
         temp = temp->next;
-        if (temp == head) {
-            printf("Position out of range.\n");
-            free(newNode);
-            return;
-        }
-        count++;
+
+    if (temp == NULL) {
+        printf("Position out of range\n");
+        free(newNode);
+        return;
     }
 
+    newNode->data = element;
     newNode->next = temp->next;
-    newNode->prev = temp;
-    temp->next->prev = newNode;
+    newNode->pre = temp;
+    if (temp->next != NULL)
+        temp->next->pre = newNode;
     temp->next = newNode;
-
-    if (temp == head->prev) {
-        head->prev = newNode;
-    }
 }
 
-// Function to delete the node at the front of the doubly circular linked list
+// Deletion from the front
 void deleteFront() {
     if (head == NULL) {
-        printf("List is empty.\n");
+        printf("List is empty\n");
         return;
     }
-
-    struct Node *temp = head;
-
-    if (temp->next == temp) { // Only one node in the list
-        free(temp);
-        head = NULL;
-    } else {
-        struct Node *last = temp->prev;
-        head = temp->next;
-        head->prev = last;
-        last->next = head;
-        free(temp);
-    }
+    struct node *temp = head;
+    head = head->next;
+    if (head != NULL)
+        head->pre = NULL;
+    free(temp);
 }
 
-// Function to delete the node at the end of the doubly circular linked list
+// Deletion from the end
 void deleteEnd() {
     if (head == NULL) {
-        printf("List is empty.\n");
+        printf("List is empty\n");
+        return;
+    }
+    struct node *temp = head;
+    if (head->next == NULL) {
+        head = NULL;
+        free(temp);
         return;
     }
 
-    struct Node *last = head->prev;
-
-    if (last == head) { // Only one node in the list
-        free(last);
-        head = NULL;
-    } else {
-        struct Node *secondLast = last->prev;
-        secondLast->next = head;
-        head->prev = secondLast;
-        free(last);
-    }
+    while (temp->next != NULL)
+        temp = temp->next;
+    temp->pre->next = NULL;
+    free(temp);
 }
 
-// Function to delete the node at a specific position in the doubly circular linked list
-void deleteAtPosition() {
-    if (head == NULL) {
-        printf("List is empty.\n");
-        return;
-    }
-
-    int position;
-    printf("Enter position to delete: ");
+// Deletion from the middle
+void deleteMiddle() {
+    int position, i = 1;
+    printf("Enter the position to delete: ");
     scanf("%d", &position);
-
-    if (position < 1) {
-        printf("Position should be 1 or greater.\n");
-        return;
-    }
-
-    struct Node *temp = head;
-    int count = 1;
 
     if (position == 1) {
         deleteFront();
         return;
     }
 
-    while (count < position) {
+    struct node *temp = head;
+    for (i = 1; i < position && temp != NULL; i++)
         temp = temp->next;
-        if (temp == head) {
-            printf("Position out of range.\n");
-            return;
-        }
-        count++;
-    }
 
-    if (temp->next == temp) { // Only one node in the list
-        free(temp);
-        head = NULL;
-    } else {
-        struct Node *prevNode = temp->prev;
-        struct Node *nextNode = temp->next;
-        prevNode->next = nextNode;
-        nextNode->prev = prevNode;
-        if (temp == head) {
-            head = nextNode;
-        }
-        free(temp);
-    }
-}
-
-// Function to display the list
-void displayList() {
-    if (head == NULL) {
-        printf("List is empty.\n");
+    if (temp == NULL) {
+        printf("Position out of range\n");
         return;
     }
 
-    struct Node* temp = head;
-    do {
-        printf("%d -> ", temp->data);
+    if (temp->pre != NULL)
+        temp->pre->next = temp->next;
+    if (temp->next != NULL)
+        temp->next->pre = temp->pre;
+    if (temp == head) // If deleting the head node
+        head = temp->next;
+    free(temp);
+}
+
+// Display the list
+void display() {
+    if (head == NULL) {
+        printf("List is empty\n");
+        return;
+    }
+
+    struct node *temp = head;
+    while (temp != NULL) {
+        printf("%d\t", temp->data);
         temp = temp->next;
-    } while (temp != head);
-    printf("(head)\n");
+    }
+    printf("\n");
 }
